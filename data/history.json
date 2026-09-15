@@ -1,0 +1,6 @@
+{
+  "generatedAt": null,
+  "retentionDays": 30,
+  "fields": ["ts", "aqius", "mainus", "tp", "hu"],
+  "series": {}
+}

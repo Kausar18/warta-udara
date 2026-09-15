@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Warta Udara — Pantau Kualitas Udara & Peringatan Cuaca</title>
+  <meta name="description" content="Pantau kualitas udara dari stasiun terdekat, peringatan dini cuaca BMKG untuk kecamatan Anda, prakiraan, dan saran kesehatan.">
+  <meta name="theme-color" content="#F5F3EE">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Warta Udara — Pantau Kualitas Udara & Peringatan Cuaca">
+  <meta property="og:description" content="AQI stasiun terdekat, peringatan dini BMKG, prakiraan, dan saran kesehatan.">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.waqi.info" crossorigin>
+  <link rel="preconnect" href="https://air-quality-api.open-meteo.com" crossorigin>
+  <link rel="preconnect" href="https://nominatim.openstreetmap.org" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=DM+Sans:opsz,wght@9..40,400..700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <script>
+    (function () {
+      var theme = null;
+      try { theme = localStorage.getItem('wu:theme'); } catch (e) {}
+      if (theme !== 'light' && theme !== 'dark') theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+  <script type="module" src="assets/js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#ringkasan">Lompat ke ringkasan</a>
+  <div class="progress" id="progress" hidden></div>
+
+  <header class="topbar" id="top">
+    <div class="wrap topbar__inner">
+      <a class="brand" href="#top" aria-label="Warta Udara, ke atas">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 8.5h10.5a2.5 2.5 0 1 0-2.5-2.5M3 12.5h15.5a2.5 2.5 0 1 1-2.5 2.5M3 16.5h7"/></svg>
+        </span>
+        <span class="brand__name">Warta<b>Udara</b></span>
+      </a>
+      <nav class="topnav" aria-label="Navigasi bagian">
+        <a href="#ringkasan">Ringkasan</a>
+        <a href="#peringatan">Peringatan</a>
+        <a href="#prakiraan">Prakiraan</a>
+        <a href="#kesehatan">Kesehatan</a>
+        <a href="#arsip">Arsip</a>
+        <a href="#tentang">Tentang Data</a>
+      </nav>
+      <span class="chip top-aqi" id="topAqi" hidden></span>
+      <button class="icon-btn" id="themeToggle" type="button" aria-label="Ganti ke tema gelap"><span id="themeIcon"></span></button>
+    </div>
+  </header>
+
+  <main id="konten" class="wrap">
+    <section class="controls" aria-label="Pilih lokasi">
+      <div class="pills" id="pills" role="group" aria-label="Kota yang dipantau"></div>
+      <div class="controls__tools">
+        <form class="search" id="searchForm" role="search" autocomplete="off">
+          <label class="sr-only" for="searchInput">Cari kota</label>
+          <span class="search__icon" data-icon="search"></span>
+          <input id="searchInput" type="search" placeholder="Cari kota atau kabupaten…" role="combobox" aria-expanded="false" aria-controls="searchResults" aria-autocomplete="list" enterkeyhint="search">
+          <ul class="search__results" id="searchResults" role="listbox" hidden></ul>
+        </form>
+        <button class="btn btn--primary" id="geoBtn" type="button"><span data-icon="pin"></span>Lokasi Saya</button>
+      </div>
+    </section>
+
+    <div class="place">
+      <div>
+        <h1 class="place__title" id="placeTitle">Memuat lokasi…</h1>
+        <p class="place__meta" id="placeMeta">&nbsp;</p>
+      </div>
+      <button class="btn btn--sm" id="shareBtn" type="button"><span data-icon="share" data-size="16"></span>Bagikan</button>
+    </div>
+
+    <div class="alert-banner" id="alertBanner" role="alert" hidden></div>
+
+    <section class="bento" id="ringkasan" aria-label="Ringkasan kondisi saat ini" aria-live="polite">
+      <article class="card b-aqi" id="aqiCard"><div class="skel skel--fill"></div></article>
+      <article class="card b-warn" id="warnCard"><div class="skel skel--fill"></div></article>
+      <article class="card b-wx" id="wxCard"><div class="skel skel--fill"></div></article>
+      <article class="card b-tips" id="tipsCard"><div class="skel skel--fill"></div></article>
+      <article class="card b-24h" id="dayCard"><div class="skel skel--fill"></div></article>
+      <article class="card b-pol" id="polutan"><div class="skel skel--fill"></div></article>
+    </section>
+
+    <section class="section" id="peringatan">
+      <header class="section__head">
+        <div>
+          <h2 class="section__title">Peringatan Dini BMKG</h2>
+          <p class="section__desc">Peringatan cuaca ekstrem resmi BMKG, dicocokkan dengan poligon wilayah dan kecamatan di sekitar lokasi Anda.</p>
+        </div>
+      </header>
+      <div id="warnBody"></div>
+    </section>
+
+    <section class="section" id="prakiraan">
+      <header class="section__head">
+        <div>
+          <h2 class="section__title">Prakiraan Kualitas Udara</h2>
+          <p class="section__desc">Indeks AQI per jam: dua hari terakhir dan lima hari ke depan.</p>
+        </div>
+      </header>
+      <div id="fcBody"></div>
+    </section>
+
+    <section class="section" id="kesehatan">
+      <header class="section__head">
+        <div>
+          <h2 class="section__title">Saran Kesehatan</h2>
+          <p class="section__desc">Berdasarkan kategori kualitas udara saat ini.</p>
+        </div>
+      </header>
+      <div id="healthBody"></div>
+    </section>
+
+    <div class="split">
+      <section class="section" id="arsip">
+        <header class="section__head">
+          <div>
+            <h2 class="section__title">Arsip 7 Hari</h2>
+            <p class="section__desc">Jejak indeks AQI per jam selama sepekan terakhir.</p>
+          </div>
+        </header>
+        <div id="archiveBody"></div>
+      </section>
+
+      <section class="section" id="kota">
+        <header class="section__head">
+          <div>
+            <h2 class="section__title">Perbandingan Kota</h2>
+            <p class="section__desc">Kota yang dipantau, dari indeks tertinggi.</p>
+          </div>
+        </header>
+        <div id="leagueBody"><div class="card skel skel--table"></div></div>
+      </section>
+    </div>
+
+    <section class="section" id="tentang">
+      <header class="section__head">
+        <div>
+          <h2 class="section__title">Tentang Data</h2>
+          <p class="section__desc">Skala AQI, urutan sumber, dan asal-usul setiap angka di halaman ini.</p>
+        </div>
+      </header>
+      <div id="aboutBody"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div>
+        <p class="brand__name footer__brand">Warta<b>Udara</b></p>
+        <p class="footer__text">Pantauan kualitas udara dan peringatan cuaca, gratis untuk semua orang. Informasi bersifat indikatif dan tidak menggantikan peringatan resmi BMKG maupun instansi pemerintah.</p>
+      </div>
+      <ul class="footer__links">
+        <li><a href="https://aqicn.org/" target="_blank" rel="noopener">World Air Quality Index Project</a></li>
+        <li><a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> (CC BY 4.0) · Copernicus CAMS</li>
+        <li><a href="https://nowcasting.bmkg.go.id/" target="_blank" rel="noopener">BMKG</a></li>
+        <li>© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">kontributor OpenStreetMap</a></li>
+      </ul>
+      <p class="footer__copy">© <span id="year">2026</span> Warta Udara · Di-host gratis di GitHub Pages</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <noscript><div class="noscript">Warta Udara membutuhkan JavaScript untuk memuat data.</div></noscript>
+</body>
+</html>

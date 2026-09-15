@@ -1,0 +1,59 @@
+{
+  "site": {
+    "timezone": "Asia/Jakarta"
+  },
+  "waqi": {
+    "token": "559d83605f8eebd2915fb3ae2af9edcb29736966",
+    "maxDistanceKm": 15
+  },
+  "locations": [
+    {
+      "id": "jakarta",
+      "name": "Jakarta",
+      "region": "DKI Jakarta",
+      "lat": -6.2088,
+      "lon": 106.8456,
+      "iqair": { "city": "Jakarta", "state": "Jakarta", "country": "Indonesia" }
+    },
+    {
+      "id": "bogor",
+      "name": "Bogor",
+      "region": "Jawa Barat",
+      "lat": -6.5971,
+      "lon": 106.806,
+      "iqair": { "city": "Bogor", "state": "West Java", "country": "Indonesia" }
+    },
+    {
+      "id": "depok",
+      "name": "Depok",
+      "region": "Jawa Barat",
+      "lat": -6.4025,
+      "lon": 106.7942,
+      "iqair": { "city": "Depok", "state": "West Java", "country": "Indonesia" }
+    },
+    {
+      "id": "tangerang",
+      "name": "Tangerang",
+      "region": "Banten",
+      "lat": -6.1783,
+      "lon": 106.6319,
+      "iqair": {
+        "city": "Tangerang",
+        "state": "Banten",
+        "country": "Indonesia"
+      }
+    },
+    {
+      "id": "bekasi",
+      "name": "Bekasi",
+      "region": "Jawa Barat",
+      "lat": -6.2383,
+      "lon": 106.9756,
+      "iqair": {
+        "city": "Bekasi",
+        "state": "West Java",
+        "country": "Indonesia"
+      }
+    }
+  ]
+}
